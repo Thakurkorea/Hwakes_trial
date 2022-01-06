@@ -1,0 +1,29 @@
+function[LL] = Haw_loglik(par,arr)
+m = par(1); a = par(2); b = par(3);
+n_arr = numel(arr);
+A = zeros(n_arr,1);
+for i = 2:n_arr
+    A(i) = exp(-b*(arr(i)-arr(i-1))).*(1+A(i-1));
+end
+f_int = sum(log(m+a*A))
+f_comp = m*arr(end)-a/b*(A(end)-(n_arr-1));
+LL = f_int-f_comp;
+end
+
+
+
+
+%% run the file with
+
+clear
+clc
+% arrivals.mat contain a sample of arrival times simulated from a Hawkes
+% process (with exponential kernel of order one) with parameters (0.5,0.6,0.8).
+load('arrivals.mat')
+parv = [0.9,0.2,0.8];
+% Evaluate LL
+Haw_loglik(parv,arr);
+% Fitting
+% start_par = [0.5,0.5,0.5];
+start_par = [0.5,0.5,0.5];
+fminsearch(@(p) -Haw_loglik(p,arr),start_par)
